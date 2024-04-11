@@ -10,16 +10,19 @@ import {
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {
+  NativeStackNavigationProp,
+  createNativeStackNavigator,
+} from '@react-navigation/native-stack';
 
-export type TypeRootStackNavigationParams = {
+type TypeRootStackParams = {
   Intro: undefined;
   Signup: NavigatorScreenParams<TypeSignupNavigation>;
   Main: undefined;
   HistoryList: undefined;
 };
 
-const Stack = createBottomTabNavigator<TypeRootStackNavigationParams>();
+const Stack = createNativeStackNavigator<TypeRootStackParams>();
 
 export const RootStackNavigation: React.FC = () => {
   return (
@@ -32,13 +35,10 @@ export const RootStackNavigation: React.FC = () => {
   );
 };
 
-export const useSignupNavigation = <
-  RouteName extends keyof TypeRootStackNavigationParams,
+export const useRootNavigation = <
+  RouteName extends keyof TypeRootStackParams,
 >() =>
-  useNavigation<
-    NativeStackNavigationProp<TypeRootStackNavigationParams, RouteName>
-  >();
+  useNavigation<NativeStackNavigationProp<TypeRootStackParams, RouteName>>();
 
-export const useSignupRoute = <
-  RouteName extends keyof TypeRootStackNavigationParams,
->() => useRoute<RouteProp<TypeRootStackNavigationParams, RouteName>>();
+export const useRootRoute = <RouteName extends keyof TypeRootStackParams>() =>
+  useRoute<RouteProp<TypeRootStackParams, RouteName>>();
