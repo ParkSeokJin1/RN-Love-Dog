@@ -16,6 +16,7 @@ import {Spacer} from '../components/Spacer';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {RemoteImage} from '../components/RemoteImage';
 import {Icon} from '../components/Icons';
+import ImagePicker from 'react-native-image-crop-picker';
 
 export const InputNameScreen: React.FC = () => {
   const rootNavigation = useRootNavigation<'Signup'>();
@@ -23,6 +24,9 @@ export const InputNameScreen: React.FC = () => {
   const routes = useSignupRoute<'InputName'>();
   const safeArea = useSafeAreaInsets();
 
+  const [selectedPhoto, setSelectedPhoto] = useState<{uri: string} | null>(
+    null,
+  );
   // 프로필 이미지 가져오기
   const [profileImage, setProfileImage] = useState(
     routes.params.preInput.profileImage,
@@ -33,7 +37,14 @@ export const InputNameScreen: React.FC = () => {
     return true;
   }, []);
 
-  const onPressProfileImage = useCallback(() => {}, []);
+  const onPressProfileImage = useCallback(async () => {
+    const photoResult = await ImagePicker.openPicker({
+      width: 300,
+      height: 300,
+      cropping: true,
+    });
+    setSelectedPhoto({uri: photoResult.path});
+  }, []);
 
   const onPressSubmit = useCallback(() => {
     //  rootNavigation.replace('Main');
@@ -62,7 +73,9 @@ export const InputNameScreen: React.FC = () => {
                 <RemoteImage
                   width={100}
                   height={100}
-                  url={profileImage}
+                  url={
+                    selectedPhoto !== null ? selectedPhoto.uri : profileImage
+                  }
                   style={{borderRadius: 50}}
                 />
                 <View style={{position: 'absolute', right: 0, bottom: 0}}>
