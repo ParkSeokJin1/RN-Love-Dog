@@ -28,6 +28,12 @@ import {Icon} from './src/components/Icons';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {NavigationContainer} from '@react-navigation/native';
 import {RootStackNavigation} from './src/navigation/RootStackNavigation';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
+
+GoogleSignin.configure({
+  webClientId:
+    '1027938583977-7pshnvjbtuk80uqlq5uof3a1u4262ca2.apps.googleusercontent.com',
+});
 
 type SectionProps = PropsWithChildren<{
   title: string;
