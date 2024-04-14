@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useMemo, useState, useRef} from 'react';
 import {View} from 'react-native';
 import {Header} from '../components/Header/Header';
 import {HeaderTitle} from '../components/Header/HeaderTitle';
@@ -17,13 +17,14 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {RemoteImage} from '../components/RemoteImage';
 import {Icon} from '../components/Icons';
 import ImagePicker from 'react-native-image-crop-picker';
+import ActionSheet from 'react-native-actionsheet';
 
 export const InputNameScreen: React.FC = () => {
   const rootNavigation = useRootNavigation<'Signup'>();
   const navigation = useSignupNavigation<'InputName'>();
   const routes = useSignupRoute<'InputName'>();
   const safeArea = useSafeAreaInsets();
-
+  const actionSheetRef = useRef<ActionSheet>(null);
   const [selectedPhoto, setSelectedPhoto] = useState<{uri: string} | null>(
     null,
   );
@@ -38,12 +39,7 @@ export const InputNameScreen: React.FC = () => {
   }, []);
 
   const onPressProfileImage = useCallback(async () => {
-    const photoResult = await ImagePicker.openPicker({
-      width: 300,
-      height: 300,
-      cropping: true,
-    });
-    setSelectedPhoto({uri: photoResult.path});
+    actionSheetRef.current?.show();
   }, []);
 
   const onPressSubmit = useCallback(() => {
@@ -129,6 +125,30 @@ export const InputNameScreen: React.FC = () => {
           <Spacer space={safeArea.bottom + 12} />
         </View>
       </Button>
+
+      <ActionSheet
+        ref={actionSheetRef}
+        options={['사진 촬영하여 선택', '갤러리에서 선택', '취소']}
+        cancelButtonIndex={2}
+        onPress={async index => {
+          if (index === 0) {
+            rootNavigation.push('TakePhoto', {
+              onTakePhoto: uri => {
+                console.log(uri);
+                setSelectedPhoto({uri: uri});
+              },
+            });
+          }
+          if (index === 1) {
+            const photoResult = await ImagePicker.openPicker({
+              width: 300,
+              height: 300,
+              cropping: true,
+            });
+            setSelectedPhoto({uri: photoResult.path});
+          }
+        }}
+      />
     </View>
   );
 };

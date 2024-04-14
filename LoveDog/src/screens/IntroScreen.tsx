@@ -42,7 +42,7 @@ export const IntroScreen: React.FC = () => {
   return (
     <View style={{flex: 1}}>
       <Header>
-        <HeaderTitle title="IntroScreen" />
+        <HeaderTitle title="Intro 로그인 페이지" />
       </Header>
 
       <View
