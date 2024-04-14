@@ -1,5 +1,5 @@
 import React, {useCallback, useMemo, useState, useRef} from 'react';
-import {View} from 'react-native';
+import {ActivityIndicator, View} from 'react-native';
 import {Header} from '../components/Header/Header';
 import {HeaderTitle} from '../components/Header/HeaderTitle';
 import {Button} from '../components/Button';
@@ -18,6 +18,8 @@ import {RemoteImage} from '../components/RemoteImage';
 import {Icon} from '../components/Icons';
 import ImagePicker from 'react-native-image-crop-picker';
 import ActionSheet from 'react-native-actionsheet';
+import {uploadFile} from '../utils/FileUtils';
+import database from '@react-native-firebase/database';
 
 export const InputNameScreen: React.FC = () => {
   const rootNavigation = useRootNavigation<'Signup'>();
@@ -25,6 +27,9 @@ export const InputNameScreen: React.FC = () => {
   const routes = useSignupRoute<'InputName'>();
   const safeArea = useSafeAreaInsets();
   const actionSheetRef = useRef<ActionSheet>(null);
+
+  const [isLoading, setIsLoading] = useState(false);
+
   const [selectedPhoto, setSelectedPhoto] = useState<{uri: string} | null>(
     null,
   );
@@ -42,9 +47,41 @@ export const InputNameScreen: React.FC = () => {
     actionSheetRef.current?.show();
   }, []);
 
-  const onPressSubmit = useCallback(() => {
-    //  rootNavigation.replace('Main');
-  }, []);
+  const onPressSubmit = useCallback(async () => {
+    const getPhotoUrl = async () => {
+      if (selectedPhoto !== null) {
+        return await uploadFile(selectedPhoto.uri);
+      }
+
+      return profileImage;
+    };
+
+    setIsLoading(true);
+
+    const photoUrl = await getPhotoUrl();
+
+    const currentTime = new Date();
+    const reference = database().ref(`member/${routes.params.uid}`);
+    await reference.set({
+      name: inputName,
+      email: routes.params.inputEmail,
+      profile: photoUrl,
+      regeditAt: currentTime.toISOString(),
+      lastLoginAt: currentTime.toISOString(),
+    });
+
+    rootNavigation.reset({
+      routes: [{name: 'Main'}],
+    });
+    setIsLoading(false);
+  }, [
+    profileImage,
+    selectedPhoto,
+    inputName,
+    routes.params.inputEmail,
+    routes.params.uid,
+    selectedPhoto,
+  ]);
 
   return (
     <View style={{flex: 1}}>
@@ -118,9 +155,13 @@ export const InputNameScreen: React.FC = () => {
           <Spacer space={16} />
 
           <View style={{alignItems: 'center', justifyContent: 'center'}}>
-            <Typography fontSize={20} color="white">
-              회원가입
-            </Typography>
+            {isLoading ? (
+              <ActivityIndicator size={20} color="white" />
+            ) : (
+              <Typography fontSize={20} color="white">
+                회원가입
+              </Typography>
+            )}
           </View>
           <Spacer space={safeArea.bottom + 12} />
         </View>
